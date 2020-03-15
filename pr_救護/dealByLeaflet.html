@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<title>DealByleaflet</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+	  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+	  crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+	  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+	  crossorigin=""></script>
+	<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+	<script src="data/deal/taipie.js"></script>
+	<script src="data/data_class.js"></script>
+	<script src="data/data_classAddTown.js"></script>
+	<script src="data/data_town.js"></script>
+	<style type="text/css">
+		html,body{
+			height: 100%;
+			width: 100%;
+			margin:0;
+			padding: 0;
+		}
+		#mapid { height: 100% }
+	</style>
+</head>
+<body>
+<div id="mapid"></div>
+</body>
+<script type="text/javascript">
+
+  // 建立 Leaflet 地圖
+	var map = L.map('mapid');
+
+	// 設定經緯度座標
+	map.setView(new L.LatLng(25.044955,121.446579), 12);
+
+	// 設定圖資來源
+	var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	var osm = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 16});
+
+
+	map.addLayer(osm);
+	L.geoJSON(taipie).addTo(map);
+	L.geoJSON(data_All ['救 護']).addTo(map);
+	// console.log(data_All)
+	// console.log(data_All ['救 護'])
+	// console.log(taipie)
+	var _point = {type: "FeatureCollection",
+				features:[]
+	}
+
+
+
+	// data_All ['救 護'].forEach(function(each){
+	// 	_point.features.push(each)
+	// })
+
+	// var tagged = turf.tag(_point, taipie, 'TOWNNAME', 'Town');
+	// console.log(tagged);	
+
+
+	// for(var eachCase in data_All){
+	// 	var _point = {type: "FeatureCollection",
+	// 				features:[]
+	// 	}
+	// 	data_All[eachCase].forEach(function(each){
+	// 		_point.features.push(each)
+	// 	})
+	// 	var tagged = turf.tag(_point, taipie, 'TOWNNAME', 'Town');
+	// 	data_All[eachCase]=tagged;
+	// }
+	// console.log(JSON.stringify(data_All));
+
+	//find case town count
+	// var townArr = [];
+	// taipie.features.forEach(function(each){
+
+	// 	townArr.push(each.properties.TOWNNAME)
+	// });
+	// console.log(townArr);
+	// console.log(dataAllAddTown);
+	// var townCount={};
+	// for(var each in dataAllAddTown){
+
+	// 	var eachCaseTown={}
+	// 	townArr.forEach(function(each){
+	// 		console.log(each)
+	// 		eachCaseTown[each+''] = null
+	// 	})
+	// 	var data1=0,data2=0,data3=0,data4=0,data5=0,data6=0,data7=0,data8=0,data9=0,data10=0,data11=0,data12=0;
+	// 	console.log(dataAllAddTown[each]);
+	// 	dataAllAddTown[each].features.forEach(function(eachPoit){
+	// 		var town = eachPoit.properties.Town;
+	// 		switch(town){
+	// 			case "大安區":
+	// 			data1+=1;
+	// 			break;
+	// 			case "文山區":
+	// 			data2+=1;
+	// 			break;
+	// 			case "信義區":
+	// 			data3+=1;
+	// 			break;
+	// 			case "萬華區":
+	// 			data4+=1;
+	// 			break;
+	// 			case "中正區":
+	// 			data5+=1;
+	// 			break;
+	// 			case "南港區":
+	// 			data6+=1;
+	// 			break;
+	// 			case "松山區":
+	// 			data7+=1;
+	// 			break;
+	// 			case "大同區":
+	// 			data8+=1;
+	// 			break;
+	// 			case "中山區":
+	// 			data9+=1;
+	// 			break;
+	// 			case "內湖區":
+	// 			data10+=1;
+	// 			break;
+	// 			case "士林區":
+	// 			data11+=1;
+	// 			break;
+	// 			case "北投區":
+	// 			data1+=1;
+	// 			break;
+
+	// 		}
+	// 	})
+	// 	var dataArr = [data1,data2,data3,data4,data5,data6,data7,data8,data9,data10,data11,data12];
+	// 	var count =0;
+	// 	for(var i in eachCaseTown){		 
+	// 		eachCaseTown[i]=dataArr[count];
+	// 		count+=1;
+	// 	}
+	// 	townCount[each] = eachCaseTown
+	// }
+
+console.log(townCount);
+
+
+var str = {大安區: 1810, 文山區: 765, 信義區: 8793,中山區: 1011};
+console.log(str);
+function arrCover(objinput){
+var newStr =[];
+for(let i in objinput){
+
+	var eachTown=i;
+	var eachNum = objinput[i];
+	var newEach ={};
+	newEach[i]=objinput[i];
+	if(JSON.stringify(newStr)=='[]'){
+		console.log(newEach)
+		newStr[0]={};
+		newStr[0][eachTown+""]=eachNum
+		
+	}else{
+		var eachNu;
+		for(var ea in newStr[0]){
+			eachNu =newStr[0][ea]
+		}
+		console.log(eachNu)
+		console.log(eachNum)
+		if(eachNu>=eachNum){
+			newStr[newStr.length -1]={};
+			newStr[newStr.length -1][eachTown+""]=eachNum	
+		}else if(eachNu<eachNum){
+			newStr.unshift(newEach)
+		}
+		console.log(newStr)
+	}
+	
+}
+return 	newStr;
+}
+
+console.log(arrCover(str))
+// for(var each in townCount){
+// 	townCount[each]=arrCover(townCount[each])
+// }
+// console.log(townCount);
+</script>
+</html>

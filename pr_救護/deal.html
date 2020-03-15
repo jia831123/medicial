@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<title></title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.0/proj4-src.js"></script>
+
+	<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
+	<script src="https://js.arcgis.com/4.14/"></script>
+
+	<script src="csvjson.js"></script>
+	<script src="geojson.js"></script>
+	<script src="data/data_class.js"></script>
+	<style type="text/css">
+		html,body{
+			margin: 0px;
+			padding:0px;
+			height:100%;
+			width: 100%;
+	        font-family:Microsoft JhengHei;
+	        padding-right: 0 !important;
+	        overflow-y: scroll!important;
+		}
+		#viewDiv {
+		    padding: 0;
+		    margin: 0;
+		    height: 100vh;
+		    width: 100%;
+		    position:absolute;
+		}
+	</style>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+<script type="text/javascript">
+
+
+
+	function _97TO84(inputCoor){
+		//首先定義坐標系統的參數(這些內容包含使用大地框架、橢球、投影等)，proj4轉換是根據這些參數
+		proj4.defs([
+		 [
+		   'EPSG:4326',
+		   '+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees'],
+		 [
+		   'EPSG:3826',
+		   '+title=TWD97 TM2+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +units=公尺 +no_defs'
+		 ],
+		 [
+		   'EPSG:3828',
+		   '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=aust_SA'
+		 ]
+		]);
+		var EPSG3826 = new proj4.Proj('EPSG:3826');//TWD97 121分帶
+		var EPSG3828 = new proj4.Proj('EPSG:3828');//TWD67 121分帶
+		var EPSG4326 = new proj4.Proj('EPSG:4326');//WGS84
+		var data1 = proj4(EPSG3826, EPSG4326, [305622.00, 2770506.00]);		
+		var _result =  proj4(EPSG3826, EPSG4326, [inputCoor[0], inputCoor[1]]);
+		return _result;
+	}
+
+	//console.log(_97TO84( [305622.00, 2770506.00]))
+
+	// var geojson = {
+	//   type: "FeatureCollection",
+	//   features: []
+	// };
+	// data.forEach(function(each){
+	// 	geojson.features.push({
+	// 	  "type": "Feature",
+	// 	  "geometry": {
+	// 	    "type": "Point",
+	// 	    "coordinates":_97TO84([each.SiteX,each.SiteY])
+	// 	  },
+	// 	  "properties": {
+	// 	  	"CASEID":each.CASEID,
+	// 	    "INSERTDATE": each.INSERTDATE,
+	// 	    "ReportAddr": each.ReportAddr,
+	// 	    "CaseType": each.CaseType
+	// 	  }
+	// 	});
+	// })
+
+ 
+  // var data_all = {};
+  // var clss = [];
+  // geojson.features.forEach(function(each){
+  // 	var _eachClass =each.properties.CaseType;
+  // 	if(clss.indexOf(""+_eachClass)== -1){
+  // 		clss.push(_eachClass);
+  // 		data_all[_eachClass] =[];
+  // 		data_all[_eachClass].push(each);
+  // 	}else{
+  // 		data_all[_eachClass].push(each);
+  // 	}
+
+  // })
+  // console.log(clss);
+  // console.log(JSON.stringify(data_all));
+
+  require([
+    "esri/Map",
+    "esri/views/MapView",
+    "esri/layers/MapImageLayer",
+     "esri/layers/WebTileLayer",
+     "esri/Graphic",
+     "esri/layers/GraphicsLayer",
+     "esri/layers/FeatureLayer"
+  ], function (Map, MapView, MapImageLayer,WebTileLayer,Graphic,GraphicsLayer,FeatureLayer) {
+//console.log(data_All);
+	var _map;
+	const _centerInitial = [121.43782426976918, 25.076677193302988]
+	map = new Map({
+	    basemap: [tiledLayer]
+	});
+	//建立地圖檢視方式
+	var view = new MapView({
+	  container: "viewDiv",
+	    map: map,
+	    center: _centerInitial,
+	    zoom:12 
+	});
+	view.on('click',function(e){
+	    console.log(e);
+	})
+	view.ui.remove(["attribution"]);
+	view.ui.remove(["zoom"]);
+	var tiledLayer = new WebTileLayer({
+	  urlTemplate:
+	    "http://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{level}/{row}/{col}.png"
+	});
+	map.add(tiledLayer);
+	var mygis = new MyGis();
+	mygis.AddFLayer('http://192.168.10.187/arcgis/rest/services/NTPC2/MapServer?f=jsapi',"id1","dynamyic",true)
+//deal_dataTime()
+// var All = [];
+// for (var each1 in data_All ){
+// 	var layer_pointArr = [];
+// 	data_All[each1].forEach(function(each){
+// 	var point = {
+// 	  type: "point",
+// 	  longitude:each.geometry.coordinates[0],
+// 	  latitude: each.geometry.coordinates[1]
+// 	};
+// 	var markerSymbol = {
+// 	  type: "simple-marker",  // autocasts as new SimpleMarkerSymbol()
+// 	  color: [226, 119, 40]
+// 	};
+// 	var popupTemplate ={
+// 	    title: each1,
+// 	      content: 
+// 	        '案件代號:'+each.properties.CASEID+'<br />案件時間:'+each.properties.INSERTDATE+'<br>案件地址:'+each.properties.ReportAddr
+	     
+// 	};
+// 	var pointGraphic = new Graphic({
+// 	  geometry: point,
+// 	  symbol: markerSymbol,
+// 	  popupTemplate:popupTemplate
+// 	});
+// 	layer_pointArr.push(pointGraphic);
+// 	})
+// 	All.push(layer_pointArr);
+// }
+//console.log(All);
+
+// var re = {"0":All}
+// console.log(JSON.stringify(re))
+//       
+
+function deal_dataTime(){
+
+	//console.log(data_All);
+	var timeObj = {};
+	for(var eachCase in data_All){
+		var _data7=0,_data8=0,_data9=0,_data10=0,_data11=0,_data12=0;
+		var co=0;
+		if(co ==0) {
+			var ar=[];
+			for(var Case_each in data_All[eachCase]){				
+				var dataMonth = parseInt(data_All[eachCase][Case_each].properties.INSERTDATE.split("-")[1]);
+				switch(dataMonth){
+					case 7:
+					_data7+=1;
+					break;
+					case 8:
+					_data8+=1;
+					break;
+					case 9:
+					_data9+=1;
+					break;
+					case 10:
+					_data10+=1;
+					break;
+					case 11:
+					_data11+=1;
+					break;
+					case 12:
+					_data12+=1;
+					break;
+				}
+
+			}
+			// ar[0]=_data7
+			// ar[1]=_data8
+			// ar[2]=_data9
+			// ar[3]=_data10
+			// ar[4]=_data11
+			// ar[5]=_data12
+		}
+		timeObj[eachCase+""] ={
+			"7":_data7,
+			"8":_data8,
+			"9":_data9,
+			"10":_data10,
+			"11":_data11,
+			"12":_data12
+		}
+	}
+	console.log(JSON.stringify(timeObj))
+}
+
+//Choey
+function MyGis(){
+    this.Layers = [];
+    this.AddFLayer= function (url, id, type, show) {
+        var _featureLayer = new FeatureLayer(url, {
+            id: id,
+            mode: FeatureLayer.MODE_ONDEMAND,
+            showAttribution: false,
+            outFields: ["*"]
+        });
+
+        //_featureLayer.setVisibility(show);
+        map.add(_featureLayer);
+
+        var linfo = {
+            LayerID: _featureLayer.id,
+            LayerType: type,
+            baseLayer: _featureLayer
+        };
+        this.Layers.push(linfo);
+    }
+    this.AddGLayer = function (id, type, show) {
+        var _graphicsLayer = new GraphicsLayer({
+            id: id
+        });
+
+        _graphicsLayer.setVisibility(show);
+        map.addLayer(_graphicsLayer);
+
+        var linfo = {
+            LayerID: _graphicsLayer.id,
+            LayerType: type,
+            baseLayer: _graphicsLayer
+        };
+        MyGis.Layers.push(linfo);
+    }
+    this.FindLayer =function (key) {
+        var _layer = null;
+        $.each(MyGis.Layers, function (i, item) {
+            if (key == item.LayerID || key == item.LayerName) {
+                _layer = item.baseLayer;
+            }
+        });
+        return _layer;
+    }
+}
+
+
+
+////foot
+});
+</script>
+</html>

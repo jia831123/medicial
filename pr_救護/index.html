@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="css/normalizes.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.6.0/echarts-en.common.js"></script>
+	<title></title>
+</head>
+<style type="text/css">
+	html,body{
+		margin: 0px;
+		padding:0px;
+		height:100%;
+		width: 100%;
+        font-family:Microsoft JhengHei;
+        padding-right: 0 !important;
+        overflow-y: scroll!important;
+	}
+	#viewDiv {
+	    padding: 0;
+	    margin: 0;
+	    height: 100vh;
+	    width: 100%;
+	    position:absolute;
+	}
+	#dataShow{
+		width:900px;
+		margin-top: 0;
+		position:absolute;
+		height:100%;
+
+	}
+	.tab-pane{
+		height: 100%
+	}
+	.tab-content{
+		height: 100%
+	}
+	.jumbotron{
+		height:100%;
+        margin: 0;
+
+	}
+    .loadingDiv{
+        z-index: 99;
+        height: 100%;
+        width: 100%;
+        background-color: rgb(0,0,0,0.5);
+        position:absolute;
+    }
+    canvas{
+    	height: 100%
+    }
+
+</style>
+<body>
+	<div id='viewDiv'>
+	</div>
+	<div id='dataShow' class="row" style="position:absolute; ">
+		<div class="jumbotron col-11">
+		  <ul class="nav nav-tabs" id="myTab" role="tablist">
+		    <li class="nav-item">
+		      <a class="nav-link " id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">..</a>
+		    </li>
+		    <li class="nav-item">
+		      <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false"><i class="fas fa-eye"></i>視覺化派遣資訊</a>
+		    </li>
+		    <li class="nav-item">
+		      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">..</a>
+		    </li>
+		  </ul>
+		  <div class="tab-content" id="myTabContent">
+		    <div class="tab-pane fade " id="home" role="tabpanel" aria-labelledby="home-tab">施工中.....</div>
+		    <div class="tab-pane fade show active"  id="profile" role="tabpanel" aria-labelledby="profile-tab">
+		    	<h3><i class="fas fa-map-marker-alt"></i>地圖類型切換</h3>
+		    	<div class="row">
+                    <select class="form-control col-3 " id="sel_medicalClass">
+                    </select>
+		    		<div class="btn-group col btn_group" role="group" aria-label="Basic example">
+		    		  <button type="button" class="btn btn-secondary col-3 btn_clusme">群聚圖</button>
+		    		  <button type="button" class="btn btn-secondary col-3  btn_heatMap">熱力圖</button>
+                      <button type="button" class="btn btn-secondary col-3  btn_point">點位圖</button>
+                      <button type="button" class="btn btn-danger col-3  btn_cleanLayer">清除</button>
+		    		</div>
+		    	</div>
+                <div class="row" style="height: 40% ;">
+                    <div class="col" >
+                        <div id="main" style="width: 300px;height:80% ;min-height: 250px" ;></div>
+                    </div>
+                    <div class="col"><div id="main2" style="width: 300px;height:80% ;min-height: 250px" ;></div></div>
+                </div>
+                 <div class="row" style="height: 40%">
+                    <div class="col"><div id="main3" style="width: 300px;height:80% ;min-height: 250px" ;></div></div>
+                    <div class="col">
+                        <table class="table"  style="font-size: 1px;margin-bottom: 0">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>案件編號</th>
+                                    <th>派遣時間</th>
+                                    <th>案件地點</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tab_show">
+                                <tr>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                </tr>
+                                <tr>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                </tr>
+                                <tr>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                </tr>
+                                <tr>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                    <th>""</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="float: right;"><a href="#" id="readMore" data-toggle="modal" data-target="#readMoreModal">read more</a></div>
+                        <div class="modal fade" id="readMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">詳細資料</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <table class="table" >
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>案件編號</th>
+                                            <th>派遣時間</th>
+                                            <th>案件地點</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id ='tab_showMore'>
+                                        <tr>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                        </tr>
+                                        <tr>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                        </tr>
+                                        <tr>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                        </tr>
+                                        <tr>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                            <th>""</th>
+                                        </tr>   
+                                    </tbody>
+                                </table>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>                     
+                 </div>
+		    </div>
+		    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">施工中.....</div>
+		  </div>
+		</div>
+		<div style="margin: 0;padding: 0; width: 50px;" class=" col-1"><button class="btn btn-secondary btn_close"><i class="far fa-arrow-alt-circle-left"></i></button></div>
+	</div>
+    <div class="loadingDiv" style="display:none">
+        <div class="d-flex justify-content-center" style="margin-top: 25%">
+            <div class="spinner-border text-light" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+</body>
+	<div id="whereAmIUi" class="esri-widget alert alert-secondary">TWD97坐標：<span id="C_97"></span>WGS8497坐標：<span id="C_84"></span></div>
+    <script src="https://cdn.bootcss.com/echarts/4.5.0-rc.2/echarts-en.common.js"></script>
+
+	<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/css/main.css">
+	<script src="https://js.arcgis.com/4.14/"></script>
+    <script src="data/data_class.js"></script>
+    <script src="data/data_time.js"></script>
+    <script src="data/data_town.js"></script>
+    <script src="data/deal/taipie.js"></script>
+    <script src="data/taipieAround.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1" crossorigin="anonymous"></link>
+    <script>
+    	$(document).ready(function(){
+            var MedicalCalss =["救護,創傷", "救護,疾病", "救護,交通意外", "救護,不明問題/路倒", "救護,精神病/行為障礙/自殺傾向", "火災,一般性通則", "救護,未決定", "救護,呼吸問題", "為民服務,警鈴響", "救護,異物哽塞", "救護,心肺停止", "為民服務,捉蛇", "為民服務,捕蜂（查看）", "救護,痙攣/發作", "為民服務,其他服務類", "為民服務,不明氣體/毒性化學災害", "為民服務,冒煙/焦味", "為民服務,協助破門", "為民服務,瓦斯漏氣", "救護,中風", "救護,腹痛", "為民服務,電梯受困", "救護,溺水潛水意外", "救護,過敏反應/昆蟲叮咬", "救護,出血/撕裂傷", "受理轉報,車禍處理", "救護,懷孕/生產/流產", "為民服務,淹水積水", "為民服務,其他天然災害類", "為民服務,道路坍塌", "救護,無意識/暈厥", "為民服務,路樹倒塌", "受理轉報,其它_受理轉報", "火災,其他輕微火警", "為民服務,電器走火", "救護,暴力/性侵害", "救護,心臟問題/體內去顫器", "為民服務,協助搬運", "救護,胸痛", "火災,建築物火警", "救護,藥物過量/中毒", "為民服務,捕狗", "為民服務,電線/招牌垂落", "救護,眼睛問題", "為民服務,其他消防類", "救護,糖尿病問題", "救護,墜落", "為民服務,屋內受困", "火災,一般交通工具火災", "為民服務,燒雜物", "為民服務,登山走失", "救護,燒燙傷爆炸", "救護,電擊", "為民服務,捕禽鳥", "救護,刺傷/槍傷/穿透傷", "救護,頭痛", "救護,動物咬傷攻擊", "救護,轉院安寧照顧", "救護,一氧化碳中毒/吸入/危險物質", "為民服務,其他動物救援", "為民服務,捕豬", "為民服務,招牌掉落", "火災,輕微交通工具火災", "救護,工廠/機械意外", "為民服務,發生房屋倒塌", "", "為民服務,捕蜂（執行）", "救護,背痛(非創傷/非新傷)", "救護,冷/熱暴露", "火災,山林火警", "為民服務,清洗路面", "為民服務,捕貓", "火災,燒雜草、垃圾", "救護,瓦斯自殺", "受理轉報,糾紛", "為民服務,發生土石流", "其他,其他", "其他,打撈浮屍", "救 護", "為民服務,送水"]
+            MedicalCalss.forEach(function(each,index){
+            	if(index>4){
+            		$("#sel_medicalClass").append("<option class='select_' value='" + each + "'>" + each + "</option>");	
+            	}
+                
+            })
+
+        })
+        // 基于准备好的dom，初始化echarts实例
+
+
+
+    	var _co = 0;
+    	$('.btn_close').on('click',function(){
+    		  if(_co == 0){
+                $('.btn_close').html('<i class="far fa-arrow-alt-circle-right"></i>')
+    		  	  $("#dataShow").animate({
+    		  	    left:"-=802.8px"
+    		  	},1000);
+    		  	_co=1;
+    		  }else if(_co == 1){
+    		  	  $("#dataShow").animate({
+    		  	    left:"+=802.8px"
+    		  		},1000);
+    		  	  _co=0;
+    		  	  $('.btn_close').html('<i class="far fa-arrow-alt-circle-left"></i>')
+    		  }
+    	})
+
+
+
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/MapImageLayer",
+         "esri/layers/WebTileLayer",
+         "esri/Graphic",
+         "esri/layers/GraphicsLayer",
+         "esri/layers/FeatureLayer",
+         "esri/renderers/HeatmapRenderer",
+      ], function (Map, MapView, MapImageLayer,WebTileLayer,Graphic,GraphicsLayer,FeatureLayer,HeatmapRenderer) {
+      	MapNormorziation();
+      	function MapNormorziation(){
+
+      	}
+        var _map;
+        const _centerInitial = [121.43782426976918, 25.076677193302988]
+        map = new Map({
+            basemap: [tiledLayer]
+        });
+        //建立地圖檢視方式
+        var view = new MapView({
+          container: "viewDiv",
+            map: map,
+            center: _centerInitial,
+            zoom:11
+        });
+        view.on('click',function(e){
+            console.log(e);
+        })
+        view.ui.remove(["attribution"]);
+        view.ui.remove(["zoom"]);
+        var tiledLayer = new WebTileLayer({
+          urlTemplate:
+            "http://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{level}/{row}/{col}.png"
+        });
+        map.add(tiledLayer);
+        function showCoordinates(pt) {
+            var coo = {
+				latitude: pt.latitude + '',
+				longitude: pt.longitude + '',
+				x: pt.x + '',
+				y: pt.y + ''
+            }
+            var _97 = '(' + coo.longitude.split('.')[0] +coo.longitude.split('.')[1][0]+coo.longitude.split('.')[1][1]+coo.longitude.split('.')[1][2]+coo.longitude.split('.')[1][3]+ "," + coo.latitude.split('.')[0] +coo.latitude.split('.')[1][0] +coo.latitude.split('.')[1][1] +coo.latitude.split('.')[1][2] +coo.latitude.split('.')[1][3]+ ")";
+            var _84 = "(" + coo.x.split('.')[0] + "," + coo.y.split('.')[0] + ")";
+            $('#C_97').text(_84);
+            $('#C_84').text(_97);
+        };
+        view.watch(["stationary"], function () {
+            showCoordinates(view.center);
+        });
+        view.on(["pointer-down", "pointer-move"], function (evt) {
+            showCoordinates(view.toMap({ x: evt.x, y: evt.y }));
+        });
+        view.ui.add('whereAmIUi', "bottom-right");
+        var jm = new JMethod();
+        var taipieAroundLayer = jm.geojson2Graphic(taipieAround);
+        map.add(taipieAroundLayer)
+        var mm = new MapMethod();//myfun
+        mm.charMethod();
+        var layerAll=null;
+        var townLayer=null;
+        var montLayer=null;
+        var everyBtnClickEve = [];
+        var pointCount =0;
+
+        $('.btn_group').on('click',function(e){
+        	console.log(pointCount+=1)
+            $('.loadingDiv').css('display','block');
+            var layer = new GraphicsLayer({
+              graphics: []
+            });
+            layerAll=null;
+            townLayer=null;
+            var _value = $("#sel_medicalClass").val();
+            var data =data_All[_value+""];           
+            setTimeout(_do,500)
+            function _do(){
+                view.goTo({
+                          target: _centerInitial,
+                          zoom: 12  
+                        })
+                switch(e.target.classList[3]){
+                    case "btn_clusme":
+                    InitialMap ();
+                    mm.clusmeMap(data,_value)
+                    mm.charMethod(data,_value);
+                    everyBtnClickEve[0]=data ;
+                    break;
+                    case "btn_heatMap":
+                    InitialMap ();
+                    mm.heatMap(data,_value)
+                    mm.charMethod(data,_value);
+                    everyBtnClickEve[0]=data ;                    
+                    break;
+                    case "btn_point":
+                    InitialMap ();
+                    mm.pointMap(data,_value);
+                    mm.charMethod(data,_value);
+                    everyBtnClickEve[0]=data ;                    
+                    break;
+                    case "btn_cleanLayer":
+                    InitialMap ();
+                    mm.cleanLayer();
+                    mm.charMethod();
+                    everyBtnClickEve[0]=null ;
+                    $('#tab_show').empty();
+                    $('#tab_showMore').empty();
+                    console.log($('#tab_showMore'));
+
+                }
+            }
+            function InitialMap (){
+            	map.removeAll();
+            	map.add(tiledLayer)
+            	map.add(taipieAroundLayer) 
+            }
+            
+        })
+
+        function JMethod(){
+        	this.geojson2Graphic = function (_geojson,_id,_selectAry,_symbol,_popupTemplate){
+				var _data        = _geojson;
+				var _thisGeoType = _data.features[0].geometry.type.toLowerCase();
+				var defSymbol=getSymbol(_thisGeoType);
+				function getSymbol(_thisGeoType){
+					var _result;
+					switch(_thisGeoType){
+						case 'polygon':
+							_result ={
+							    type: "simple-fill",
+							    color: [66,103,178,0.2],
+							    outline:{
+							        color: '#3b5998',
+							        width:1
+							    }
+							}							
+						break;
+						case 'polyline':
+						_result= {
+						  type: "simple-line",  // autocasts as new SimpleLineSymbol()
+						  color: [66,103,178,0.2],
+						  width: "2px",
+						  style: "short-dash"
+						};
+						break;
+						case 'point':						
+						_result ={
+						    type: "simple-marker",
+						    color: [66,103,178,0.2],
+						    outline:{
+						        color: '#3b5998',
+						        width:0.5
+							}
+						}						
+						break;
+					}
+					return _result
+				}			
+				_symbol        = _symbol         ==undefined ? defSymbol :_symbol;				
+				_popupTemplate =_popupTemplate   ==undefined ?null  :_popupTemplate;				
+				var _layer       = new GraphicsLayer({id:_id});
+        		_data.features.forEach(function(each,index){
+	         		var eachShape ={
+	         		    type:""+_thisGeoType,
+	         		    rings:each.geometry.coordinates
+	         		}       	
+	        		var eachGraphic = new Graphic({
+						geometry: eachShape,
+						symbol: _symbol,
+						popupTemplate:_popupTemplate        			
+	        		})
+	        		 _layer.addMany([eachGraphic])      		 	
+        		})        		
+        		return _layer;
+        	}
+        }
+        
+
+        function MapMethod(_data,_value){
+            this.pointMap = function(_data,_value,_fun){
+                var layer_pointArr = [];
+                _data.forEach(function(each,index){
+	                 if(1==1){
+						var point = {
+						  type: "point",
+						  longitude: each.geometry.coordinates[0],
+						  latitude: each.geometry.coordinates[1]
+						};
+						var markerSymbol = {
+						  type: "simple-marker", 
+						  color: "red",
+						  size: 5
+						};
+						var popupTemplate ={
+						    title: _value,
+						      content: 
+						        '案件代號:'+each.properties.CASEID+'<br />案件時間:'+each.properties.INSERTDATE+'<br>案件地址:'+each.properties.ReportAddr                  
+						   };
+						var pointGraphic = new Graphic({
+						  geometry: point,
+						  symbol: markerSymbol,
+						  popupTemplate:popupTemplate,
+						  attributes:{
+						  	CASEID:each.properties.CASEID,
+						  	INSERTDATE:each.properties.INSERTDATE,
+						  	ReportAddr:each.properties.ReportAddr
+						  }
+						});
+						layer_pointArr.push(pointGraphic);	                 	
+	                 }
+
+                })
+                var _layer =new GraphicsLayer({
+                  graphics: []
+                });
+                _layer.addMany(layer_pointArr);
+                _layer.on("layerview-create",function(){
+                    setTimeout(function(){$('.loadingDiv').css('display','none')},500)
+                })
+                layerAll = _layer;
+                map.add(layerAll);                                   
+            }
+            this.heatMap = function(_data,_value){
+                var renderer = {
+                  type: "heatmap",
+                  colorStops:  [
+                    { ratio: 0, color: "rgba(0, 255, 150, 0)" },
+                    { ratio: 0.6, color: "rgb(250, 250, 0)" },
+                    { ratio: 0.85, color: "rgb(250, 150, 0)"},
+                    { ratio: 0.95, color: "rgb(255, 50, 0)"}],
+                  maxPixelIntensity: 25,
+                  minPixelIntensity: 0
+                };
+                var features =[];
+                console.log(_data);
+                _data.forEach(function(each,index){
+                    features.push({
+                        geometry:{
+                            type:"point",
+                            x:each.geometry.coordinates[0],
+                            y:each.geometry.coordinates[1]
+                        },
+                        attributes:{
+                            ObjectID:index
+                        }
+                    })
+                });
+                var featureLayer = new FeatureLayer({
+                    source:features,
+                    objectIdField: "ObjectID",//重要！！！
+                    renderer: renderer//渲染器                    
+                })
+                layerAll = featureLayer;
+                map.add(featureLayer);               
+                featureLayer.on("layerview-create",function(){
+                    setTimeout(function(){$('.loadingDiv').css('display','none')},2000)                    
+                })
+
+                 
+            }
+            this.clusmeMap = function(_data,_value){
+                var features =[];
+                _fun()
+                function _fun(){
+                    return new Promise(function(resolve,reject){
+                        _data.forEach(function(each,index){
+                            features.push({
+                                geometry:{
+                                    type:"point",
+                                    x:each.geometry.coordinates[0],
+                                    y:each.geometry.coordinates[1]
+                                },
+                                attributes:{
+                                    ObjectID:index
+                                }
+                            })
+                        });
+                        var featureReduction  =  {
+                        	type: "cluster",
+                         	clusterRadius: "100px"}
+                        var featureLayer = new FeatureLayer({
+                            source:features,
+                            objectIdField: "ObjectID",
+                            featureReduction :featureReduction 
+
+                        })
+                        layerAll = featureLayer;
+                        featureLayer.on("layerview-create",function(){
+                            setTimeout(function(){$('.loadingDiv').css('display','none')},3000)
+                        })
+                        map.add(layerAll);
+                        
+                    })
+                }
+
+                              
+            }
+            this.cleanLayer =function(){
+                $('.loadingDiv').css('display','none');
+            }
+            this.charMethod=function(_data,_value){
+                var _initial=[0, 0, 0, 0, 0, 0];
+                if(_value==null){
+                    //無數據，初始化
+                    _thisdata =_initial;
+                }else{
+                    //有數據，事件變動char
+                    var monArr=[];
+                    for(var i in data_time[_value]){
+                        monArr.push(data_time[_value][i])
+                    }
+                    _thisdata = monArr
+                }
+                var myChart = echarts.init(document.getElementById('main'));
+                var myChart2 = echarts.init(document.getElementById('main2'));
+                var myChart3 = echarts.init(document.getElementById('main3'));
+                var myChart4 =$('#tab_show');
+                var myChart4_1 =$('#tab_showMore');
+                // 指定图表的配置项和数据
+                var option = {
+                    title: {
+                        text: '每月數量',
+                        subtext: '(次)',
+                        left: 'center'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['7月', '8月', '9月', '10月', '11月', '12月']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: _thisdata,
+                        type: 'line'
+                    }]
+                };
+                if(townCount[_value]!=undefined){
+                    var ch2Datatown=[];
+                    var ch2DatatownCount=[];
+                    var ch3Data=[];
+                    for(var each in townCount[_value]){
+                        ch2Datatown.push(each);
+                        ch2DatatownCount.push(townCount[_value][each]);
+                        var eachCh3Data={
+                        					value:townCount[_value][each],
+                                            name:each
+                                        };
+                        ch3Data.push(eachCh3Data)                
+                    }               
+                    
+                }
+                myChart.setOption(option);
+                myChart.on('click',function(params){
+                	if(layerAll.graphics==null){
+                		return;
+                	}
+                	var _month = params.name; 
+                	_month = parseInt(_month.split('月')[0]);
+                	layerAll.graphics.items.forEach(function(each,index){
+                		var eachMonth = parseInt(each.attributes.INSERTDATE.split("-")[1])
+                		each.visible=true;
+                		if( eachMonth != _month){
+                			each.visible=false;          			
+                		}
+                	})
+
+
+                		//好笨的方法
+                	// map.remove(layerAll);
+                	// var _month = params.name;            	
+                	// _month = parseInt(_month.split('月')[0]);
+                	// layerAll.graphics.items.forEach(function(each,index){
+                	// 	var eachMonth = parseInt(each.attributes.INSERTDATE.split("-")[1])
+                	// 	each.visible=true;
+                	// 	if( eachMonth != _month){
+                	// 		each.visible=false;          			
+                	// 	}
+                	// 	if(index==layerAll.graphics.items.length-1){
+                	// 		setTimeout(function(){
+                	// 			map.add(layerAll);
+                	// 		},10)
+                			
+                	// 	}
+                	// })
+
+	
+                })
+                var option2 ={
+                    color: ['red'],
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            data: ch2Datatown ||["*", "*", "*", "*", "*", "*", "*"],
+                            axisTick: {
+                                alignWithLabel: true
+                            }
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            name: '數量',
+                            type: 'bar',
+                            barWidth: '60%',
+                            data:ch2DatatownCount|| [0, 0, 0, 0, 0, 0, 0]
+                        }
+                    ]
+                };
+
+                myChart2.setOption(option2);
+                myChart2.on('click',function(params){                                      
+                    map.remove(townLayer);
+                    var town =params.name;
+                    var _data=taipie.features[TwonCoverNum(town)];
+                    var coor = [_data.properties.centerX-0.033,_data.properties.centerY];
+                    townLayer = creatTown(_data);
+                    map.add(townLayer);
+                    view.goTo({
+                          target: coor,
+                          zoom: 13
+                        })
+                    function creatTown(_data){
+                        console.log(_data);                        
+                        var layer = new GraphicsLayer({
+                            graphics:[]
+                        });
+                        var polygon ={
+                            type:"polygon",
+                            rings:_data.geometry.coordinates[0]
+                        }
+                        var fillsymbol={
+                            type: "simple-fill",
+                            color: [0,0,0,0.1],
+                            outline:{
+                                color: [0, 0, 0],
+                                width:2
+                            }
+                        }
+                        var polygonGraphic = new Graphic({
+                            geometry:polygon,
+                            symbol:fillsymbol
+                        })
+                        layer.addMany([polygonGraphic])
+                        return layer;
+                    }
+                    function TwonCoverNum (_inputTown){
+                        var townnum=99;
+                        switch(_inputTown){
+                            case'大安區':
+                            townnum=0;
+                            break;
+                            case'文山區':
+                            townnum=1;
+                            break;
+                            case'信義區':
+                            townnum=2;
+                            break;
+                            case'萬華區':
+                            townnum=3;
+                            break;
+                            case'中正區':
+                            townnum=4;
+                            break;                       
+                            case'南港區':
+                            townnum=5;
+                            break;
+                            case'松山區':
+                            townnum=6;
+                            break;  
+                            case'大同區':
+                            townnum=7;
+                            break;
+                            case'中山區':
+                            townnum=8;
+                            break;
+                            case'內湖區':
+                            townnum=9;
+                            break;
+                            case'士林區':
+                            townnum=10;
+                            break;
+                            case'北投區':
+                            townnum=11;
+                            break;
+                        }
+                        return townnum;
+                    }
+
+                })
+                var option3 = {
+                        series : [
+                        {
+                            name: '访问来源',
+                            type: 'pie',    // 设置图表类型为饼图
+                            radius: '55%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                            data:ch3Data||[          // 数据数组，name 为数据项名称，value 为数据项值
+                                {value:1000, name:'null'}
+
+                            ]
+                        }
+                    ]
+                };
+                myChart3.setOption(option3);
+                if(_data!=undefined){
+                    myChart4.empty();
+                    
+                    putIntable();
+                    $('#readMore').on('click',function(){
+                    	myChart4_1.empty();
+                        putIntable('readMore')
+                    })
+                    
+                    function putIntable(_Parm){
+                        if(_Parm == null){
+                            var _forCount = function(){
+                                return 4;
+                            };
+                            var _inputTable = myChart4;
+                        }else if (_Parm=='readMore'){
+                            var _forCount = function(_dataLength){
+                                return _dataLength;
+                            };
+                            var _inputTable = myChart4_1;
+
+                        }
+                        _data.forEach(function(each,index){
+                            if(index<_forCount(_data.length) ){
+                                var str = each.properties.ReportAddr;
+                                if(str.length>14){
+                                    var oldStr = str.split('');
+                                    var newStr='';
+                                    for(var i =0;i<12;i++){
+                                        newStr+=oldStr[i];
+                                        if(i==11){
+                                            newStr+='<span><a href="#" onclick=\'(function(){alert("'+str+'")})()\'>...</a></span>'
+                                        }
+                                    }
+                                }
+                                if(newStr==undefined){
+                                    newStr="暫無資訊"
+                                }
+                                var _table = '<tr class="click_table" ><th class="click_point"><a href="#"><i class="fas fa-map-pin" data-coor="'+[each.geometry.coordinates[0],each.geometry.coordinates[1]]+'"></a></i></th><th>'+each.properties.CASEID+'</th><th>'+each.properties.INSERTDATE+'</th><th>'+newStr+'</th><tr/>';
+                                _inputTable.append(_table)
+                            }
+                            
+                            
+                        })                        
+                    }
+
+                }
+                $(document).on('click','.click_point',function(e){
+                    
+                    var coor =[parseFloat(e.target.dataset.coor.split(',')[0])-0.0005,parseFloat(e.target.dataset.coor.split(',')[1])] ;
+                    console.log(coor)
+                    view.goTo({
+                          target: coor,
+                          zoom: 19
+                        });
+                    $('#readMoreModal').modal('hide')
+                })
+
+
+            } 
+        }
+
+
+
+
+
+      });
+    </script>
+</html>
